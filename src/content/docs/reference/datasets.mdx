@@ -1,0 +1,43 @@
+---
+title: Datasets API
+description: Upload and manage survey datasets.
+---
+
+## `GET /datasets/`
+- **Purpose:** List all active datasets (metadata only).
+- **Auth:** Required.
+- **Response:** JSON array with `dataset_id`, `dataset_name`, `row_count`, `column_count`, `created_by`, timestamps, etc.
+
+## `GET /datasets/{id}`
+- **Purpose:** Retrieve dataset metadata by ID.
+- **Auth:** Required.
+
+## `GET /datasets/data/{id}`
+- **Purpose:** Retrieve the stored dataset JSON payload. Returns 404 if not found or if data was not persisted.
+- **Auth:** Required.
+
+## `POST /datasets/upload`
+- **Purpose:** Upload a CSV or SAV file and create a dataset in one step.
+- **Auth:** Required.
+- **Multipart body:**
+  - `file`: CSV/SAV file.
+  - `dataset_name`: human-readable name.
+  - `created_by`: user ID (integer).
+- **Behavior:** File is parsed, row/column counts inferred, and dataset data stored as JSON.
+
+## `POST /datasets/`
+- **Purpose:** Create a dataset from JSON payload.
+- **Body:** `DatasetCreate` schema (name, optional `dataset_data`, row/column counts, filepath, created_by).
+
+## `PATCH /datasets/{id}`
+- **Purpose:** Update metadata (name, counts, filepath, etc.).
+- **Auth:** Required.
+
+## `DELETE /datasets/{id}`
+- **Purpose:** Soft-delete dataset (sets `is_active = false`).
+- **Auth:** Required.
+
+### Validation & Errors
+- 400 for invalid payloads (e.g., unsupported file type, malformed JSON).
+- 401 for missing/invalid tokens.
+- 404 for unknown dataset IDs.

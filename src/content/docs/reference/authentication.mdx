@@ -1,0 +1,41 @@
+---
+title: Authentication
+description: Learn how to obtain, refresh, and revoke tokens.
+---
+
+## `POST /token`
+- **Purpose:** Exchange credentials for JWT access and refresh tokens.
+- **Body (form data):**
+  - `username`: account email (e.g., `admin@example.com`).
+  - `password`: plaintext password (e.g., `NebulaFox!903`).
+- **Response:**
+  ```json
+  {
+    "access_token": "...",
+    "refresh_token": "...",
+    "token_type": "bearer"
+  }
+  ```
+- **Notes:** Access tokens expire after `ACCESS_TOKEN_EXPIRE_MINUTES` minutes; refresh tokens last 7 days.
+
+## `POST /token/refresh`
+- **Purpose:** Issue a new access token using a valid refresh token.
+- **Body:** `{ "refresh_token": "..." }`
+- **Response:** Same schema as `/token`.
+
+## `POST /token/logout`
+- **Purpose:** Revoke the current access token. The token is added to a blacklist until its original expiration and will be rejected on subsequent requests.
+- **Auth:** Include the current bearer token.
+
+## Using Tokens
+1. Call `/token` with valid credentials.
+2. Store the returned `access_token` securely (the frontend stores it in `sessionStorage`).
+3. Attach `Authorization: Bearer <access_token>` to every protected API call.
+4. When the access token expires, call `/token/refresh` with the refresh token to obtain a new one.
+5. Call `/token/logout` to force immediate revocation.
+
+## Password Policy
+- Minimum 10 characters.
+- At least one uppercase letter, one lowercase letter, one digit, and one special character.
+- `password_confirm` must match on creation/update.
+- Passwords are hashed with Argon2 before storage; plaintext passwords are never persisted.

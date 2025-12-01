@@ -1,0 +1,41 @@
+---
+title: Graphs API
+description: Generate and manage network graphs built from nodesets.
+---
+
+## `GET /graphs/`
+- **Purpose:** List graphs. Optional query parameter `nodeset_id` filters by parent nodeset.
+- **Auth:** Required.
+
+## `GET /graphs/{id}`
+- **Purpose:** Retrieve a single graph (metadata, `graph_data`, optional `extra_data`).
+- **Auth:** Required.
+
+## `POST /graphs/`
+- **Purpose:** Create a graph from a nodeset and model configuration.
+- **Auth:** Required.
+- **Body:**
+  ```json
+  {
+    "graph_name": "MGM – Young Voters",
+    "graph_description": "Mixed graphical model",
+    "graph_data": { "adjacency": [[0,0.12],[0.12,0]] },
+    "extra_data": { "lambda": 0.2 },
+    "parent_nodeset": 5,
+    "created_by": 1
+  }
+  ```
+- **Validation:** `parent_nodeset` must exist. The backend may kick off model middleware (e.g., MGM) before saving the adjacency matrix.
+
+## `PATCH /graphs/{id}`
+- **Purpose:** Update graph metadata or stored data.
+- **Auth:** Required.
+
+## `DELETE /graphs/{id}`
+- **Purpose:** Soft-delete a graph (sets `is_active = false`).
+- **Auth:** Required.
+
+### Errors
+- 400: Invalid payload (missing nodeset, malformed adjacency data, etc.).
+- 401: Missing/invalid token.
+- 404: Graph not found.

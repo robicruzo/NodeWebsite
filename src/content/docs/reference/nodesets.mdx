@@ -1,0 +1,42 @@
+---
+title: Nodesets API
+description: Create and manage nodesets derived from datasets.
+---
+
+## `GET /nodesets/`
+- **Purpose:** List all active nodesets.
+- **Auth:** Required.
+
+## `GET /nodesets/{id}`
+- **Purpose:** Retrieve nodeset metadata plus stored `nodeset_data` (if available).
+- **Auth:** Required.
+
+## `POST /nodesets/`
+- **Purpose:** Create a nodeset from a dataset selection.
+- **Auth:** Required.
+- **Body:**
+  ```json
+  {
+    "nodeset_name": "Young Voters",
+    "nodeset_description": "Respondents aged 18-29",
+    "nodeset_data": { "rows": [0, 2, 5], "columns": ["AGE", "VOTE_INT"] },
+    "row_count": 325,
+    "column_count": 12,
+    "parent_dataset": 1,
+    "created_by": 1
+  }
+  ```
+- **Validation:** `parent_dataset` must exist. Row/column counts are optional; the backend will infer if omitted when possible.
+
+## `PATCH /nodesets/{id}`
+- **Purpose:** Update metadata or data payload.
+- **Auth:** Required. Setting a new `parent_dataset` triggers validation.
+
+## `DELETE /nodesets/{id}`
+- **Purpose:** Soft-delete nodeset (sets `is_active = false`).
+- **Auth:** Required.
+
+### Errors
+- 400: Validation failures (missing name, invalid parent dataset, etc.).
+- 401: Missing/invalid token.
+- 404: Nodeset not found.

@@ -1,0 +1,52 @@
+---
+title: Users API
+description: Manage accounts via the secured users endpoints.
+---
+
+## Overview
+All `/users` routes require a valid bearer token. Obtain one via [`POST /token`](/reference/authentication/#post-token) and include it in the `Authorization: Bearer <token>` header of every request.
+
+## `GET /users/`
+- **Purpose:** List all active users.
+- **Auth:** Required.
+- **Response:** JSON array of user objects (`user_id`, `user_email`, `display_name`, `user_role`, `is_active`, `is_verified`, timestamps, etc.).
+- **Example:**
+  ```bash
+  curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/users/
+  ```
+
+## `GET /users/{user_email}`
+- **Purpose:** Retrieve a user by email.
+- **Auth:** Required.
+- **Responses:** 200 with the user object or 404 if the email does not exist.
+
+## `POST /users/create`
+- **Purpose:** Create a new user (admin-only in the current UI).
+- **Auth:** Required.
+- **Body:**
+  ```json
+  {
+    "user_email": "analyst@example.com",
+    "user_password": "NebulaFox!903",
+    "password_confirm": "NebulaFox!903",
+    "user_role": "user",
+    "display_name": "Research Analyst"
+  }
+  ```
+- **Validation:** Passwords must be ≥10 chars and include uppercase, lowercase, number, and special character. `password_confirm` must match.
+- **Response:** Newly created user record (hashed password is never returned).
+
+## `PATCH /users/{user_id}`
+- **Purpose:** Update an existing user.
+- **Auth:** Required.
+- **Body:** Partial JSON payload; only include fields you wish to change (e.g., `display_name`, `user_role`, `user_password`). New passwords must satisfy the same policy as creation.
+
+## `DELETE /users/{user_email}`
+- **Purpose:** Soft-delete a user (sets `is_active = false`).
+- **Auth:** Required.
+- **Responses:** 200 with updated user or 404 if email not found.
+
+### Error Codes
+- `401 Unauthorized`: Missing/invalid token or inactive account.
+- `400 Bad Request`: Validation failure (weak password, duplicate email, etc.).
+- `404 Not Found`: User does not exist.
